@@ -82,6 +82,32 @@ sdp_session_t* register_service(uint8_t rfcomm_channel)
     return session;
 }
 
+char input[1024] = { 0 };
+char *read_server(int client) {
+    // read data from the client
+    int bytes_read;
+    bytes_read = read(client, input, sizeof(input));
+    if (bytes_read > 0) {
+        printf("received [%s]\n", input);
+        return input;
+    } else {
+        return NULL;
+    }
+}
+
+void *ThreadMain(void *argument)
+{
+    char *recv_message = read_server(client);
+    if ( recv_message == NULL )
+    {
+        printf("client disconnected\n");
+        break;
+    } 
+        
+    printf("%s\n", recv_message);
+    close(client);
+}
+
 int main(int argc, char *argv[])
 {
     cout << "Bluetooth Connection Start" << endl;
