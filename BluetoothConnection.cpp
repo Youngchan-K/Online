@@ -89,8 +89,8 @@ int main(int argc, char *argv[])
 {
     cout << "Bluetooth Connection Start" << endl;
     int port = 5;
-    sdp_session_t* session = register_service(port)
-    
+    sdp_session_t* session = register_service(port);
+
     struct sockaddr_rc Local;
     struct sockaddr_rc Remote;
 
