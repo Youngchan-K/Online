@@ -18,8 +18,16 @@
 #include <bluetooth/sdp.h>
 #include <bluetooth/sdp_lib.h>
 
-#include "Docking.h"
+#include "../ATS_Com/ATSCom.h"
 
 using namespace std;
+
+class BluetoothControl
+{
+private:
+    int turn_cart(double theta);
+    
+    int go_straight(double distance);
+}
 
 #endif
