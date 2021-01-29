@@ -1,6 +1,8 @@
 #ifndef BLUETOOTHCONTROL
 #define BLUETOOTHCONTROL
 
+#define PORT 5
+
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,6 +17,8 @@
 #include <bluetooth/sco.h>
 #include <bluetooth/sdp.h>
 #include <bluetooth/sdp_lib.h>
+
+#include "Docking.h"
 
 using namespace std;
 
