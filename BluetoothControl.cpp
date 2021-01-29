@@ -1,5 +1,5 @@
-// g++ -o Bluetooth BluetoothConnection.cpp -lbluetooth -> ./Bluetooth
-// 리눅스에서 컴파일하고 실행하면, Segmentation Fault가 발생할 수 있음
+// 컴파일&실행 : g++ -o Bluetooth BluetoothConnection.cpp -lbluetooth -> ./Bluetooth
+// Segmentation Fault가 발생할 수 있음
 /*
 sudo nano /etc/systemd/system/dbus-org.bluez.service
 ExecStart=/usr/lib/bluetooth/bluetoothd 뒤에 '(앞에 1칸 띄어쓰기)--compat 추가'
@@ -20,7 +20,7 @@ sdp_session_t* register_service(uint8_t rfcomm_channel)
     const char *company = "EVAR";
     const char *description = "Electric car Charge Service";
     
-    // RFCOMM 프로토콜 하부에는 L2CAP 프로토콜이 Transport protocol로 작동
+    // RFCOMM 프로토콜 하부에서 Transport protocol로 L2CAP 프로토콜이 작동
     // RFCOMM을 사용하여 블루투스 통신을 하면 L2CAP 프로토콜도 사용됨
     uuid_t root_uuid, l2cap_uuid, rfcomm_uuid, service_uuid, service_class_uuid;
     sdp_list_t *l2cap_list = 0,
@@ -99,8 +99,7 @@ sdp_session_t* register_service(uint8_t rfcomm_channel)
 int main(int argc, char *argv[])
 {
     cout << "Bluetooth Connection Start" << endl;
-    int port = 5;
-    sdp_session_t* session = register_service(port);
+    sdp_session_t* session = register_service(PORT);
 
     struct sockaddr_rc Local;
     struct sockaddr_rc Remote;
@@ -113,12 +112,11 @@ int main(int argc, char *argv[])
     BTsocket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
 
     // Local 설정
-
     Local.rc_family = AF_BLUETOOTH;
     Local.rc_bdaddr = bdaddr_any;
-    Local.rc_channel = (uint8_t) port; // RFCOMM Channel의 개수는 최대 30까지
+    Local.rc_channel = (uint8_t) PORT; // RFCOMM Channel의 개수는 최대 30까지
 
-    // Bind 
+    // Bind
     if (bind(BTsocket, (struct sockaddr *)&Local, sizeof(Local)) < 0)
     {
         cout << "Bind Failed" << endl;
@@ -129,7 +127,7 @@ int main(int argc, char *argv[])
     }
 
     // Listen
-    if (listen(BTsocket, port) < 0) // 연결 시도하는 클라이언트 최대 5개
+    if (listen(BTsocket, PORT) < 0) // 연결 시도하는 클라이언트 최대 5개
     {
         cout << "Listen Failed" << endl;
 
@@ -160,11 +158,36 @@ int main(int argc, char *argv[])
 
         if(read_data > 0) 
         {
-            cout << "Received Data :" << input << endl;
+            cout << "Received Data : " << input << endl;
+            string str_input = (string)input;
             
-            if(input == "F" )
+            // 입력값에 따라 카트 1cm씩 이동
+            if(str_input == "F")
             {
-                
+                cout << "앞으로 이동" << endl;
+                go_straight(10);
+            }
+            else if(str_input == "B")
+            {
+                cout << "뒤로 이동" << endl;
+                go_straight(-10);
+            }
+
+            // 입력값에 따라 카트 1도씩 회전
+            else if (str_input == "L")
+            {
+                cout << "왼쪽으로 회전" << endl;
+                turn_cart(1);
+            }
+            else if (str_input == "R")
+            {
+                cout << "오른쪽으로 회전" << endl;
+                turn_cart(-1);
+            }
+
+            else if (str_input == "S")
+            {
+                cout << "긴급 정지" << endl;
             }
         }
     } while (read_data > 0); 
