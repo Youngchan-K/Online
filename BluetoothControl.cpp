@@ -1,19 +1,12 @@
-// 컴파일&실행 : g++ -o Bluetooth BluetoothConnection.cpp -lbluetooth -> ./Bluetooth
-// Segmentation Fault가 발생할 수 있음
-/*
-sudo nano /etc/systemd/system/dbus-org.bluez.service
-ExecStart=/usr/lib/bluetooth/bluetoothd 뒤에 '(앞에 1칸 띄어쓰기)--compat 추가'
-
-sudo nano ~/.bashrc 입력 후, 파일 끝에 sudo chmod 777 /var/run/sdp 추가
-*/
-
 #include "BluetoothControl.h"
 
 bdaddr_t bdaddr_any = {0, 0, 0, 0, 0, 0};
 bdaddr_t bdaddr_local = {0, 0, 0, 0xff, 0xff, 0xff};
 
-// 블루투스 포트 사용할 수 있도록 UUID 설정
-sdp_session_t* register_service(uint8_t rfcomm_channel)
+// 목적 : UUID setting
+// 개요 : 블루투스 포트 사용할 수 있도록 UUID 설정
+// parameter : rfcomm_channel - 연결할 PORT의 개수
+sdp_session_t* BluetoothControl::register_service(uint8_t rfcomm_channel)
 {
     uint32_t service_uuid_int[] = {0x01110000, 0x00100000, 0x80000080, 0xFB349B5F};
     const char *name = "JCart Bluetooth Control";
@@ -95,11 +88,14 @@ sdp_session_t* register_service(uint8_t rfcomm_channel)
     return session;
 }
 
-// Docking.cpp 코드 이용
+// Docking.cpp 코드 이용 -> go_straight & turn_cart
+
+// 목적 : 카트 이동
+// 개요 : 카트를 원하는 거리 만큼 직선 이동
+// parameter : distance - 이동할 거리(mm)
 int BluetoothControl::go_straight(double distance)
 {
     unsigned long cnt = 0, cnt1 = 0;
-    printf("go straight cart %f mm\n", distance);
     usleep(50);
     this->com->auto_set_vw(distance * 10, 0, 0, 0);
 
@@ -128,16 +124,17 @@ int BluetoothControl::go_straight(double distance)
     return 0;
 }
 
+// 목적 : 카트 회전
+// 개요 : 카트를 원하는 각도만큼 제자리 회전
+// parameter : theta - 회전할 각도(deg)
 int BluetoothControl::turn_cart(double theta)
 {
     unsigned long cnt = 0, cnt1 = 0;
-    printf("turn cart %f deg\n", theta);
     usleep(50);
     this->com->auto_set_vw(0, theta * 10, 0, 0);
 
     while (com->ID.moveCheck != 1)
     {
-	//printf("cnt : %d\n", cnt);
         cnt++;
         if (cnt == 0xfffffff)
         {
@@ -160,10 +157,12 @@ int BluetoothControl::turn_cart(double theta)
     return 0;
 }
 
-
-int main(int argc, char *argv[])
+// 목적 : Bluetooth 서버 생성하여 스마트폰과 연결
+// 개요 : 스마트폰에서 입력한 값에 따라 카트 원격 제어
+// 안드로이드만 Service 가능 (아이폰 X)
+int BluetoothControl::run()
 {
-    cout << "Bluetooth Connection Start" << endl;
+    printf("Bluetooth Connection Start\n");
     sdp_session_t* session = register_service(PORT);
 
     struct sockaddr_rc Local;
@@ -184,22 +183,22 @@ int main(int argc, char *argv[])
     // Bind
     if (bind(BTsocket, (struct sockaddr *)&Local, sizeof(Local)) < 0)
     {
-        cout << "Bind Failed" << endl;
+        printf("Bind Failed\n");
     }
     else
     {
-        cout << "Bind Success" << endl;
+        printf("Bind Success\n");
     }
 
-    // Listen
-    if (listen(BTsocket, PORT) < 0) // 연결 시도하는 클라이언트 최대 5개
+    // Listen - 클라이언트 접속 대기
+    if (listen(BTsocket, PORT) < 0) // 연결 시도하는 클라이언트 최대 개수
     {
-        cout << "Listen Failed" << endl;
+        printf("Listen Failed\n");
 
     }
     else
     {
-        cout << "Listen for connection..." << endl;
+        printf("Listen for connection...\n");
     }
 
     
@@ -208,11 +207,11 @@ int main(int argc, char *argv[])
 
     if (client < 0)
     {
-        cout << "Accept Failed" << endl;
+        printf("Accept Failed\n");
     }
     else
     {
-        cout << "Accept Success" << endl;
+        printf("Accept Success!\n");
     }
             
     // Read data - 클라이언트로부터 데이터 수신
@@ -223,47 +222,47 @@ int main(int argc, char *argv[])
 
         if(read_data > 0) 
         {
-            cout << "Received Data : " << input << endl;
+            printf("Received Data : %s\n", input);
             string str_input = (string)input;
             
-            // 입력값에 따라 카트 1cm씩 이동
+            // 입력값에 따라 카트 10mm씩 이동
             if(str_input == "F")
             {
-                cout << "앞으로 이동" << endl;
+                printf("Go Straight\n");
                 go_straight(10);
             }
             else if(str_input == "B")
             {
-                cout << "뒤로 이동" << endl;
+                printf("Go Back\n");
                 go_straight(-10);
             }
 
             // 입력값에 따라 카트 1도씩 회전
             else if (str_input == "L")
             {
-                cout << "왼쪽으로 회전" << endl;
+                printf("Turn Left\n");
                 turn_cart(1);
             }
             else if (str_input == "R")
             {
-                cout << "오른쪽으로 회전" << endl;
+                printf("Turn Right\n");
                 turn_cart(-1);
             }
 
             else if (str_input == "S")
             {
-                cout << "긴급 정지" << endl;
+                printf("Stop\n");
             }
         }
     } while (read_data > 0); 
 
 
-    // Close connection
+    // Close socket and connection
     close(client);
     close(BTsocket);
     sdp_close(session);
     
-    cout << "연결 종료" << endl;
+    printf("연결 종료");
 
     return 0;
 }
