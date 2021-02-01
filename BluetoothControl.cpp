@@ -89,6 +89,7 @@ sdp_session_t* BluetoothControl::register_service(uint8_t rfcomm_channel)
 }
 
 // Docking.cpp 코드 이용 -> go_straight & turn_cart
+// Aruco 카메라가 없으면 Docking.h을 그대로 사용했을 때, 오류 발생 가능성 존재
 
 // 목적 : 카트 이동
 // 개요 : 카트를 원하는 거리 만큼 직선 이동
@@ -120,7 +121,7 @@ int BluetoothControl::go_straight(double distance)
     puts("moveCheck received");
     while (com->check != AUTO);
     com->check = WAIT;
-    printf("result dist : %f mm\tresult ang : %f deg\n", (double)(com->ID.motorDistance / 10), (double)(com->ID.motorOmega / 10));
+
     return 0;
 }
 
@@ -153,13 +154,14 @@ int BluetoothControl::turn_cart(double theta)
     puts("moveCheck received");
     while (com->check != AUTO);
     com->check = WAIT;
-    printf("result dist : %f mm\tresult ang : %f deg\n", (double)(com->ID.motorDistance / 10), (double)(com->ID.motorOmega / 10));
+
     return 0;
 }
 
 // 목적 : Bluetooth 서버 생성하여 스마트폰과 연결
-// 개요 : 스마트폰에서 입력한 값에 따라 카트 원격 제어
-// 안드로이드만 Service 가능 (아이폰 X)
+// 개요 : 스마트폰에서 입력한 값에 따라 카트 원격 제어. 안드로이드만 사용 가능
+// 아이폰은 Bluetooth를 모두 지원하는 것은 아니고, 오디오 출력 및 마우스/키보드 등 일부에 한정
+// iOS에서 Bluetooth 파일 전송이 규정되어 있는 FTP를 지원하지 않으므로, Bluetooth 규격에 따른 파일 전송 불가
 int BluetoothControl::run()
 {
     printf("Bluetooth Connection Start\n");
@@ -262,7 +264,7 @@ int BluetoothControl::run()
     close(BTsocket);
     sdp_close(session);
     
-    printf("연결 종료");
+    printf("연결 종료\n");
 
     return 0;
 }
