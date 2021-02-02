@@ -28,9 +28,9 @@ private:
 
     sdp_session_t* register_service(uint8_t rfcomm_channel);
 
-    int go_straight(double distance);
-    int turn_cart(double theta);
-    int stopbrake()
+    int gostraight(double distance);
+    int turncart(double theta);
+    int stopbrake();
 
 public:
     int run();
