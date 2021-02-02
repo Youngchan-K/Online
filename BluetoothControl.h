@@ -8,14 +8,10 @@
 #ifndef BLUETOOTHCONTROL
 #define BLUETOOTHCONTROL
 
-#include "../ATS_Com/ATSCom.h"
+#include "ATSCom.h"
 #include <iostream>
-
-// 리눅스 환경에서 해당 라이브러리를 불러오지 못할 수도 있음
-// sudo apt-get install libbluetooth-dev 설치 필요
 #include <sys/socket.h>
 #include <bluetooth/bluetooth.h>
-//
 #include <bluetooth/rfcomm.h>
 #include <bluetooth/sco.h>
 #include <bluetooth/sdp.h>
@@ -34,9 +30,10 @@ private:
 
     int go_straight(double distance);
     int turn_cart(double theta);
+    int stopbrake()
 
 public:
     int run();
 };
-    
+
 #endif
