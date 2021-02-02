@@ -15,6 +15,7 @@ sdp_session_t* BluetoothControl::register_service(uint8_t rfcomm_channel)
     
     // RFCOMM 프로토콜 하부에서 Transport protocol로 L2CAP 프로토콜이 작동
     // RFCOMM을 사용하여 블루투스 통신을 하면 L2CAP 프로토콜도 사용됨
+
     uuid_t root_uuid, l2cap_uuid, rfcomm_uuid, service_uuid, service_class_uuid;
     sdp_list_t *l2cap_list = 0,
                *rfcomm_list = 0,
@@ -88,39 +89,20 @@ sdp_session_t* BluetoothControl::register_service(uint8_t rfcomm_channel)
     return session;
 }
 
-// Docking.cpp 코드 이용 -> go_straight & turn_cart
+// Docking.cpp 코드 이용 -> go_straight / turn_cart
 // Aruco 카메라가 없으면 Docking.h을 그대로 사용했을 때, 오류 발생 가능성 존재
 
 // 목적 : 카트 이동
 // 개요 : 카트를 원하는 거리 만큼 직선 이동
 // parameter : distance - 이동할 거리(mm)
-int BluetoothControl::go_straight(double distance)
+int BluetoothControl::gostraight(double distance)
 {
     unsigned long cnt = 0, cnt1 = 0;
     usleep(50);
     this->com->auto_set_vw(distance * 10, 0, 0, 0);
 
-    while (com->ID.moveCheck != 1)
-    {
-	//printf("cnt : %d\n", cnt); 
-        cnt++;
-        if (cnt == 0xfffffff)
-        {
-            this->com->auto_set_vw(distance * 10, 0, 0, 0);
-            cnt1++;
-            cnt = 0;
-            puts("cnt initialize");
-            if (cnt1 == 10)
-            {
-                puts("turn cart Error");
-                exit(-1);
-            }
-        }
-    }
-    com->ID.moveCheck = 0;
-    puts("moveCheck received");
-    while (com->check != AUTO);
-    com->check = WAIT;
+    com->atsData.moveCheck = 0;
+    puts("moveCheck received\n");
 
     return 0;
 }
@@ -128,32 +110,28 @@ int BluetoothControl::go_straight(double distance)
 // 목적 : 카트 회전
 // 개요 : 카트를 원하는 각도만큼 제자리 회전
 // parameter : theta - 회전할 각도(deg)
-int BluetoothControl::turn_cart(double theta)
+int BluetoothControl::turncart(double theta)
 {
     unsigned long cnt = 0, cnt1 = 0;
     usleep(50);
     this->com->auto_set_vw(0, theta * 10, 0, 0);
 
-    while (com->ID.moveCheck != 1)
-    {
-        cnt++;
-        if (cnt == 0xfffffff)
-        {
-            this->com->auto_set_vw(0, theta * 10, 0, 0);
-            cnt1++;
-            cnt = 0;
-            puts("cnt initialize");
-            if (cnt1 == 10)
-            {
-                puts("turn cart Error");
-                exit(-1);
-            }
-        }
-    }
-    com->ID.moveCheck = 0;
-    puts("moveCheck received");
-    while (com->check != AUTO);
-    com->check = WAIT;
+    com->atsData.moveCheck = 0;
+    puts("moveCheck received\n");
+
+    return 0;
+}
+
+// 목적 : 카트 긴급 정지
+// 개요 : 카트 작동이 멈추지 않을 때 사용
+int BluetoothControl::stopbrake()
+{
+    unsigned long cnt = 0, cnt1 = 0;
+    usleep(50);
+    this->com->auto_set_vw(0, 0, 2, 0);
+
+    com->atsData.moveCheck = 0;
+    puts("moveCheck received\n");
 
     return 0;
 }
@@ -231,29 +209,30 @@ int BluetoothControl::run()
             if(str_input == "F")
             {
                 printf("Go Straight\n");
-                go_straight(10);
+                gostraight(10);
             }
             else if(str_input == "B")
             {
                 printf("Go Back\n");
-                go_straight(-10);
+                gostraight(-10);
             }
 
             // 입력값에 따라 카트 1도씩 회전
             else if (str_input == "L")
             {
                 printf("Turn Left\n");
-                turn_cart(1);
+                turncart(1);
             }
             else if (str_input == "R")
             {
                 printf("Turn Right\n");
-                turn_cart(-1);
+                turncart(-1);
             }
 
             else if (str_input == "S")
             {
                 printf("Stop\n");
+                stopbrake();
             }
         }
     } while (read_data > 0); 
