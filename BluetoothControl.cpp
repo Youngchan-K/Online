@@ -104,7 +104,7 @@ int BluetoothControl::gostraight(double distance)
 {
     unsigned long cnt = 0, cnt1 = 0;
     printf("go straight cart %f mm\n", distance);
-    usleep(50);
+    usleep(10);
     this->com->auto_set_vw(distance * 10, 0, 0, 0);
 
     while (com->atsData.moveCheck != 1)
@@ -136,12 +136,12 @@ int BluetoothControl::gostraight(double distance)
 
 
 // 목적 : 카트 회전
-// 개요 : 카트를 원하는 각도만큼 제자리 회전
+// 개요 : 카트를 원하는 각도만큼 제자리 회전 (시계 방향)
 // parameter : theta - 회전할 각도(deg)
 int BluetoothControl::turncart(double theta)
 {
     unsigned long cnt = 0, cnt1 = 0;
-    usleep(50);
+    usleep(10);
     printf("turn cart %f deg\n", theta);
     this->com->auto_set_vw(0, theta * 10, 0, 0);
 
@@ -260,24 +260,24 @@ int BluetoothControl::run()
             if(str_input == "F")
             {
                 printf("Go Straight\n");
-                gostraight(10);
+                gostraight(100);
             }
             else if(str_input == "B")
             {
                 printf("Go Back\n");
-                gostraight(-10);
+                gostraight(-100);
             }
 
             // 입력값에 따라 카트 1도씩 회전
             else if (str_input == "L")
             {
                 printf("Turn Left\n");
-                turncart(1);
+                turncart(-10);
             }
             else if (str_input == "R")
             {
                 printf("Turn Right\n");
-                turncart(-1);
+                turncart(10);
             }
 
             else if (str_input == "S")
