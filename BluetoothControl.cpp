@@ -1,9 +1,14 @@
 #include "BluetoothControl.h"
 
+BluetoothControl::BluetoothControl(ATSCom *in)
+{
+    this->com = in;        // 외부 SerialCommunication 클래스 인자로 받기
+}
+
 bdaddr_t bdaddr_any = {0, 0, 0, 0, 0, 0};
 bdaddr_t bdaddr_local = {0, 0, 0, 0xff, 0xff, 0xff};
 
-// 목적 : UUID setting
+// 목적 : Bluetooth UUID setting
 // 개요 : 블루투스 포트 사용할 수 있도록 UUID 설정
 // parameter : rfcomm_channel - 연결할 PORT의 개수
 sdp_session_t* BluetoothControl::register_service(uint8_t rfcomm_channel)
@@ -98,6 +103,7 @@ sdp_session_t* BluetoothControl::register_service(uint8_t rfcomm_channel)
 int BluetoothControl::gostraight(double distance)
 {
     unsigned long cnt = 0, cnt1 = 0;
+    printf("go straight cart %f mm\n", distance);
     usleep(50);
     this->com->auto_set_vw(distance * 10, 0, 0, 0);
 
@@ -107,6 +113,7 @@ int BluetoothControl::gostraight(double distance)
     return 0;
 }
 
+
 // 목적 : 카트 회전
 // 개요 : 카트를 원하는 각도만큼 제자리 회전
 // parameter : theta - 회전할 각도(deg)
@@ -114,6 +121,7 @@ int BluetoothControl::turncart(double theta)
 {
     unsigned long cnt = 0, cnt1 = 0;
     usleep(50);
+    printf("turn cart %f deg\n", theta);
     this->com->auto_set_vw(0, theta * 10, 0, 0);
 
     com->atsData.moveCheck = 0;
@@ -121,6 +129,7 @@ int BluetoothControl::turncart(double theta)
 
     return 0;
 }
+
 
 // 목적 : 카트 긴급 정지
 // 개요 : 카트 작동이 멈추지 않을 때 사용
@@ -193,7 +202,7 @@ int BluetoothControl::run()
     {
         printf("Accept Success!\n");
     }
-            
+         
     // Read data - 클라이언트로부터 데이터 수신
     do
     {
