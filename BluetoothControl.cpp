@@ -1,5 +1,8 @@
 #include "BluetoothControl.h"
 
+// 목적 : 생성자 함수
+// 개요 : 변수 초기화
+// parameter : in - 외부 SerialCommunication 클래스 변수
 BluetoothControl::BluetoothControl(ATSCom *in)
 {
     this->com = in;        // 외부 SerialCommunication 클래스 인자로 받기
@@ -129,7 +132,7 @@ int BluetoothControl::gostraight(double distance)
     puts("moveCheck received\n");
     while (com->check != AUTO);
     com->check = WAIT;
-    printf("result dist : %f mm\tresult ang : %f deg\n", (double)(com->ID.motorDistance / 10), (double)(com->ID.motorOmega / 10));
+    printf("result dist : %f mm\tresult ang : %f deg\n", (double)(com->atsData.motorDistance / 10), (double)(com->atsData.motorOmega / 10));
 
     return 0;
 }
@@ -167,7 +170,7 @@ int BluetoothControl::turncart(double theta)
     puts("moveCheck received\n");
     while (com->check != AUTO);
     com->check = WAIT;
-    printf("result dist : %f mm\tresult ang : %f deg\n", (double)(com->ID.motorDistance / 10), (double)(com->ID.motorOmega / 10));
+    printf("result dist : %f mm\tresult ang : %f deg\n", (double)(com->atsData.motorDistance / 10), (double)(com->atsData.motorOmega / 10));
 
     return 0;
 }
