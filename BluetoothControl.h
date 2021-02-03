@@ -26,14 +26,15 @@ class BluetoothControl
 private:
     ATSCom *com;
 
-    sdp_session_t* register_service(uint8_t rfcomm_channel);
+    sdp_session_t* register_service(uint8_t rfcomm_channel);    // Bluetooth UUID 설정
 
-    int gostraight(double distance);
-    int turncart(double theta);
-    int stopbrake();
+    int gostraight(double distance);    // 카트 직선 이동
+    int turncart(double theta);     // 카트 회전
+    int stopbrake();    // 긴급 중지
 
 public:
-    int run();
+    BluetoothControl(ATSCom *in);
+    int run();      // 실행 파일
 };
 
 #endif
