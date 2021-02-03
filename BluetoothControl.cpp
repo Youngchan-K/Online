@@ -107,8 +107,29 @@ int BluetoothControl::gostraight(double distance)
     usleep(50);
     this->com->auto_set_vw(distance * 10, 0, 0, 0);
 
+    while (com->ID.moveCheck != 1)
+    {
+	//printf("cnt : %d\n", cnt); 
+        cnt++;
+        if (cnt == 0xfffffff)
+        {
+            this->com->auto_set_vw(distance * 10, 0, 0, 0);
+            cnt1++;
+            cnt = 0;
+            puts("cnt initialize");
+            if (cnt1 == 10)
+            {
+                puts("turn cart Error");
+                exit(-1);
+            }
+        }
+    }
+
     com->atsData.moveCheck = 0;
     puts("moveCheck received\n");
+    while (com->check != AUTO);
+    com->check = WAIT;
+    printf("result dist : %f mm\tresult ang : %f deg\n", (double)(com->ID.motorDistance / 10), (double)(com->ID.motorOmega / 10));
 
     return 0;
 }
@@ -124,8 +145,29 @@ int BluetoothControl::turncart(double theta)
     printf("turn cart %f deg\n", theta);
     this->com->auto_set_vw(0, theta * 10, 0, 0);
 
+    while (com->ID.moveCheck != 1)
+    {
+	//printf("cnt : %d\n", cnt);
+        cnt++;
+        if (cnt == 0xfffffff)
+        {
+            this->com->auto_set_vw(0, theta * 10, 0, 0);
+            cnt1++;
+            cnt = 0;
+            puts("cnt initialize");
+            if (cnt1 == 10)
+            {
+                puts("turn cart Error");
+                exit(-1);
+            }
+        }
+    }
+
     com->atsData.moveCheck = 0;
     puts("moveCheck received\n");
+    while (com->check != AUTO);
+    com->check = WAIT;
+    printf("result dist : %f mm\tresult ang : %f deg\n", (double)(com->ID.motorDistance / 10), (double)(com->ID.motorOmega / 10));
 
     return 0;
 }
