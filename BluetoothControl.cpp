@@ -107,7 +107,7 @@ int BluetoothControl::gostraight(double distance)
     usleep(50);
     this->com->auto_set_vw(distance * 10, 0, 0, 0);
 
-    while (com->ID.moveCheck != 1)
+    while (com->atsData.moveCheck != 1)
     {
 	//printf("cnt : %d\n", cnt); 
         cnt++;
@@ -145,7 +145,7 @@ int BluetoothControl::turncart(double theta)
     printf("turn cart %f deg\n", theta);
     this->com->auto_set_vw(0, theta * 10, 0, 0);
 
-    while (com->ID.moveCheck != 1)
+    while (com->atsData.moveCheck != 1)
     {
 	//printf("cnt : %d\n", cnt);
         cnt++;
