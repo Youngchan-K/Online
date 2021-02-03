@@ -18,7 +18,7 @@
 
 int main()
 {
-    ATSCom atscom("/dev/ttyUSB0", 115200, 0, 1);
+    ATSCom atscom("/dev/ttyS1", 115200, 0, 1);
     BluetoothControl BC(&atscom);
     
     uint8_t BTdata1 = 0;
